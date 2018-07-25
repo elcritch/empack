@@ -1,0 +1,3 @@
+BasedOnStyle: WebKit
+IndentWidth: 2
+MaxEmptyLinesToKeep: 3
