@@ -6,6 +6,10 @@
 typedef int em_size_t;
 #endif
 
+#ifndef em_byte_t
+typedef const char em_byte_t;
+#endif
+
 // ====================== Buffer ============== //
 
 #ifdef __cplusplus
@@ -21,7 +25,7 @@ struct byte_buff {
 
 typedef struct byte_buff buffer_t;
 
-void buffer_setup(buffer_t* sb, char* data_buffer, em_size_t data_len);
+void buffer_init(buffer_t* sb, char* data_buffer, em_size_t data_len);
 
 int buffer_available(buffer_t* sb);
 
