@@ -13,7 +13,7 @@ int buffer_available(buffer_t * data) {
   return data->len - data->pos;
 }
 
-int16_t buffer_read_byte(buffer_t * data)
+int16_t buffer_read_byte(buffer_t * data) {
   if (buffer_available(data) < length)
     return -1;
 
