@@ -2,7 +2,7 @@
 #include "em_buffer.h"
 
 
-void buffer_init(buffer_t * data, uint8_t *data_buffer, em_size_t data_len)
+void buffer_init(buffer_t * data, em_byte_t *data_buffer, em_size_t data_len)
  {
    data->data = data_buffer;
    data->len = data_len;
@@ -13,7 +13,15 @@ int buffer_available(buffer_t * data) {
   return data->len - data->pos;
 }
 
-int buffer_read_bytes(buffer_t * data, uint8_t * buffer, int length) {
+int16_t buffer_read_byte(buffer_t * data)
+  if (buffer_available(data) < length)
+    return -1;
+
+  data->max = data->pos+1;
+  return data->data[data->pos++];
+}
+
+int buffer_read_bytes(buffer_t * data, em_byte_t * buffer, int length) {
   if (buffer_available(data) < length)
         return -1;
 
