@@ -10,6 +10,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "em_buffer.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,23 +27,22 @@ typedef int em_size_t;
 // ====================== TYPES ============== //
 
 enum empack_types {
-  EMPACK_EMPTY = 0xff,
-  EMACKP_NIL = 0xc0,
-  EMACKP_BOOL = 0xc2,
-  EMACKP_UINT = 0xcc,
-  EMACKP_SINT = 0xd0,
-  EMACKP_FLOAT = 0xca,
-  EMACKP_STRING = 0xd9,
-  EMACKP_BIN = 0xc4,
-  EMACKP_EXT = 0xc7,
-  EMACKP_ARRAY = 0xdc,
-  EMACKP_MAP = 0xde,
+  EMPACK_EMPTY = 0xFF,
+  EMACKP_NIL = 0xC0,
+  EMACKP_BOOL = 0xC2,
+  EMACKP_UINT = 0xCC,
+  EMACKP_SINT = 0xD0,
+  EMACKP_FLOAT = 0xCA,
+  EMACKP_STRING = 0xD9,
+  EMACKP_BIN = 0xC4,
+  EMACKP_EXT = 0xC7,
+  EMACKP_ARRAY = 0xDC,
+  EMACKP_MAP = 0xDE,
   EMACKP_UNKNOWN = 0x00,
 };
 
 typedef enum empack_types empack_type_t;
 struct byte_buff;
-typedef struct byte_buff buffer_t;
 
 #define EMPACK_UINT_SMALL_MAX 224
 #define EMPACK_SINT_SMALL_MAX 128
@@ -91,34 +92,6 @@ void empack_write_start_map(buffer_t* s, uint32_t map_size);
 void empack_to_json(buffer_t* output, buffer_t* input, emsize_t buffer_size);
 #endif // EMPACK_JSON
 
-// ====================== Buffer ============== //
-
-struct byte_buff {
-  char* buf;
-  em_size_t pos;
-  em_size_t max;
-  em_size_t len;
-};
-
-void buffer_setup(buffer_t* sb, char* data_buffer, emsize_t data_len);
-
-int buffer_available(buffer_t* sb);
-
-int buffer_read_bytes(buffer_t* sb, uint8_t* buffer, int length);
-
-uint16_t buffer_read_byte(buffer_t* sb);
-
-emsize_t buffer_write_bytes(buffer_t* sb, uint8_t* buffer, uint32_t data_len);
-
-int buffer_peek(buffer_t* sb);
-
-void buffer_flush(buffer_t* sb);
-
-void buffer_clear(buffer_t* sb);
-
-void buffer_reset(buffer_t* sb);
-
-void buffer_reset_all(buffer_t* sb);
 
 #ifdef __cplusplus
 }
