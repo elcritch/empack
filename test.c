@@ -70,13 +70,13 @@ void print_hexdump(char* str, int len)
 #define TEST_DESTROY_MATCH_IMPL(expect)                                         \
   do {                                                                          \
     static const char buf[] = expect;                                           \
-    size_t used = stream.max;                                                   \
-    bool t = sizeof(buf) - 1 == used && memcmp(buf, stream.buf, used) == 0;     \
+    size_t used = buffer.max;                                                   \
+    bool t = sizeof(buf) - 1 == used && memcmp(buf, buffer.buf, used) == 0;     \
     if (!t) {                                                                   \
       printf("\n\tlhs: ");                                                      \
       print_hexdump((char*)buf, sizeof(buf) - 1);                               \
       printf("\n\trhs: ");                                                      \
-      print_hexdump(stream.buf, stream.max);                                    \
+      print_hexdump(buffer.buf, buffer.max);                                    \
       printf("\n");                                                             \
     }                                                                           \
     TEST_TRUE(t,                                                                \
@@ -87,30 +87,30 @@ void print_hexdump(char* str, int len)
 // runs a simple reader test, ensuring the expression is true and no errors occur
 #define TEST_SIMPLE_READ(buf, read_expr)                                  \
   do {                                                                    \
-    stream_t stream;                                                      \
-    TEST_READER_INIT_STR(&stream, buf);                                   \
+    buffer_t buffer;                                                      \
+    TEST_READER_INIT_STR(&buffer, buf);                                   \
     TEST_TRUE((read_expr), "simple read test did not pass: " #read_expr); \
   } while (0)
 
-// runs a simple stream test, ensuring it matches the given buf
+// runs a simple buffer test, ensuring it matches the given buf
 #define TEST_SIMPLE_WRITE(expect, write_op)  \
   do {                                       \
-    stream_t stream;                         \
+    buffer_t buffer;                         \
     bool r;                                  \
-    stream_setup(&stream, buf, sizeof(buf)); \
+    buffer_init(&buffer, buf, sizeof(buf)); \
     write_op;                                \
     TEST_DESTROY_MATCH_IMPL(expect);         \
   } while (0)
 
 #define MAX_TEST_BUFF 4096
-void empack_stream_init(stream_t* reader)
+void empack_buffer_init(buffer_t* reader)
 {
-  char* buf = malloc(MAX_TEST_BUFF);
+  em_byte_t* buf = malloc(MAX_TEST_BUFF);
   reader->buf = buf;
   reader->len = MAX_TEST_BUFF;
 }
 
-void empack_reader_init_data(stream_t* reader, char* buf, size_t len)
+void empack_reader_init_data(buffer_t* reader, char* buf, size_t len)
 {
   memcpy(reader->buf, buf, len);
 }
@@ -137,126 +137,126 @@ void test_true_impl(bool result, const char* file, int line, const char* format,
 // writes ints using the auto int()/uint() functions
 static void test_write_simple_auto_int()
 {
-  char buf[4096];
+  em_byte_t buf[4096];
 
   // positive fixnums
-  TEST_SIMPLE_WRITE("\x00", empack_write_u64(&stream, 0));
-  TEST_SIMPLE_WRITE("\x01", empack_write_u64(&stream, 1));
-  TEST_SIMPLE_WRITE("\x02", empack_write_u64(&stream, 2));
-  TEST_SIMPLE_WRITE("\x0f", empack_write_u64(&stream, 0x0f));
-  TEST_SIMPLE_WRITE("\x10", empack_write_u64(&stream, 0x10));
-  TEST_SIMPLE_WRITE("\x7e", empack_write_u64(&stream, 0x7e));
-  TEST_SIMPLE_WRITE("\x7f", empack_write_u64(&stream, 0x7f));
+  TEST_SIMPLE_WRITE("\x00", empack_write_u64(&buffer, 0));
+  TEST_SIMPLE_WRITE("\x01", empack_write_u64(&buffer, 1));
+  TEST_SIMPLE_WRITE("\x02", empack_write_u64(&buffer, 2));
+  TEST_SIMPLE_WRITE("\x0f", empack_write_u64(&buffer, 0x0f));
+  TEST_SIMPLE_WRITE("\x10", empack_write_u64(&buffer, 0x10));
+  TEST_SIMPLE_WRITE("\x7e", empack_write_u64(&buffer, 0x7e));
+  TEST_SIMPLE_WRITE("\x7f", empack_write_u64(&buffer, 0x7f));
 
   // positive fixnums with signed int functions
-  TEST_SIMPLE_WRITE("\x00", empack_write_i64(&stream, 0));
-  TEST_SIMPLE_WRITE("\x01", empack_write_i64(&stream, 1));
-  TEST_SIMPLE_WRITE("\x02", empack_write_i64(&stream, 2));
-  TEST_SIMPLE_WRITE("\x0f", empack_write_i64(&stream, 0x0f));
-  TEST_SIMPLE_WRITE("\x10", empack_write_i64(&stream, 0x10));
-  TEST_SIMPLE_WRITE("\x7e", empack_write_i64(&stream, 0x7e));
-  TEST_SIMPLE_WRITE("\x7f", empack_write_i64(&stream, 0x7f));
+  TEST_SIMPLE_WRITE("\x00", empack_write_i64(&buffer, 0));
+  TEST_SIMPLE_WRITE("\x01", empack_write_i64(&buffer, 1));
+  TEST_SIMPLE_WRITE("\x02", empack_write_i64(&buffer, 2));
+  TEST_SIMPLE_WRITE("\x0f", empack_write_i64(&buffer, 0x0f));
+  TEST_SIMPLE_WRITE("\x10", empack_write_i64(&buffer, 0x10));
+  TEST_SIMPLE_WRITE("\x7e", empack_write_i64(&buffer, 0x7e));
+  TEST_SIMPLE_WRITE("\x7f", empack_write_i64(&buffer, 0x7f));
 
   // negative fixnums
-  TEST_SIMPLE_WRITE("\xff", empack_write_i64(&stream, -1));
-  TEST_SIMPLE_WRITE("\xfe", empack_write_i64(&stream, -2));
-  TEST_SIMPLE_WRITE("\xf0", empack_write_i64(&stream, -16));
-  TEST_SIMPLE_WRITE("\xe1", empack_write_i64(&stream, -31));
-  TEST_SIMPLE_WRITE("\xe0", empack_write_i64(&stream, -32));
+  TEST_SIMPLE_WRITE("\xff", empack_write_i64(&buffer, -1));
+  TEST_SIMPLE_WRITE("\xfe", empack_write_i64(&buffer, -2));
+  TEST_SIMPLE_WRITE("\xf0", empack_write_i64(&buffer, -16));
+  TEST_SIMPLE_WRITE("\xe1", empack_write_i64(&buffer, -31));
+  TEST_SIMPLE_WRITE("\xe0", empack_write_i64(&buffer, -32));
 
   // uints
-  TEST_SIMPLE_WRITE("\xcc\x80", empack_write_u64(&stream, 0x80));
-  TEST_SIMPLE_WRITE("\xcc\xff", empack_write_u64(&stream, 0xff));
-  TEST_SIMPLE_WRITE("\xcd\x01\x00", empack_write_u64(&stream, 0x100));
-  TEST_SIMPLE_WRITE("\xcd\xff\xff", empack_write_u64(&stream, 0xffff));
-  TEST_SIMPLE_WRITE("\xce\x00\x01\x00\x00", empack_write_u64(&stream, 0x10000));
-  TEST_SIMPLE_WRITE("\xce\xff\xff\xff\xff", empack_write_u64(&stream, 0xffffffff));
-  /* TEST_SIMPLE_WRITE("\xcf\x00\x00\x00\x01\x00\x00\x00\x00", empack_write_u64(&stream, UINT64_C(0x100000000))); */
-  /* TEST_SIMPLE_WRITE("\xcf\xff\xff\xff\xff\xff\xff\xff\xff", empack_write_u64(&stream, UINT64_C(0xffffffffffffffff))); */
+  TEST_SIMPLE_WRITE("\xcc\x80", empack_write_u64(&buffer, 0x80));
+  TEST_SIMPLE_WRITE("\xcc\xff", empack_write_u64(&buffer, 0xff));
+  TEST_SIMPLE_WRITE("\xcd\x01\x00", empack_write_u64(&buffer, 0x100));
+  TEST_SIMPLE_WRITE("\xcd\xff\xff", empack_write_u64(&buffer, 0xffff));
+  TEST_SIMPLE_WRITE("\xce\x00\x01\x00\x00", empack_write_u64(&buffer, 0x10000));
+  TEST_SIMPLE_WRITE("\xce\xff\xff\xff\xff", empack_write_u64(&buffer, 0xffffffff));
+  /* TEST_SIMPLE_WRITE("\xcf\x00\x00\x00\x01\x00\x00\x00\x00", empack_write_u64(&buffer, UINT64_C(0x100000000))); */
+  /* TEST_SIMPLE_WRITE("\xcf\xff\xff\xff\xff\xff\xff\xff\xff", empack_write_u64(&buffer, UINT64_C(0xffffffffffffffff))); */
 
   // positive ints with signed value
-  TEST_SIMPLE_WRITE("\xcc\x80", empack_write_u8(&stream, 0x80));
-  TEST_SIMPLE_WRITE("\xcc\xff", empack_write_u8(&stream, 0xff));
-  TEST_SIMPLE_WRITE("\xcd\x01\x00", empack_write_u64(&stream, 0x100));
-  TEST_SIMPLE_WRITE("\xcd\xff\xff", empack_write_u64(&stream, 0xffff));
-  TEST_SIMPLE_WRITE("\xce\x00\x01\x00\x00", empack_write_u64(&stream, 0x10000));
-  TEST_SIMPLE_WRITE("\xce\xff\xff\xff\xff", empack_write_u64(&stream, INT64_C(0xffffffff)));
-  /* TEST_SIMPLE_WRITE("\xcf\x00\x00\x00\x01\x00\x00\x00\x00", empack_write_u64(&stream, INT64_C(0x100000000))); */
-  /* TEST_SIMPLE_WRITE("\xcf\x7f\xff\xff\xff\xff\xff\xff\xff", empack_write_u64(&stream, INT64_C(0x7fffffffffffffff))); */
+  TEST_SIMPLE_WRITE("\xcc\x80", empack_write_u8(&buffer, 0x80));
+  TEST_SIMPLE_WRITE("\xcc\xff", empack_write_u8(&buffer, 0xff));
+  TEST_SIMPLE_WRITE("\xcd\x01\x00", empack_write_u64(&buffer, 0x100));
+  TEST_SIMPLE_WRITE("\xcd\xff\xff", empack_write_u64(&buffer, 0xffff));
+  TEST_SIMPLE_WRITE("\xce\x00\x01\x00\x00", empack_write_u64(&buffer, 0x10000));
+  TEST_SIMPLE_WRITE("\xce\xff\xff\xff\xff", empack_write_u64(&buffer, INT64_C(0xffffffff)));
+  /* TEST_SIMPLE_WRITE("\xcf\x00\x00\x00\x01\x00\x00\x00\x00", empack_write_u64(&buffer, INT64_C(0x100000000))); */
+  /* TEST_SIMPLE_WRITE("\xcf\x7f\xff\xff\xff\xff\xff\xff\xff", empack_write_u64(&buffer, INT64_C(0x7fffffffffffffff))); */
 
   // ints
-  TEST_SIMPLE_WRITE("\xd0\xdf", empack_write_i64(&stream, -33));
-  /* TEST_SIMPLE_WRITE("\xd0\x80", empack_write_i64(&stream, -128)); */
-  TEST_SIMPLE_WRITE("\xd1\xff\x7f", empack_write_i64(&stream, -129));
-  TEST_SIMPLE_WRITE("\xd1\x80\x00", empack_write_i64(&stream, -32768));
-  TEST_SIMPLE_WRITE("\xd2\xff\xff\x7f\xff", empack_write_i64(&stream, -32769));
+  TEST_SIMPLE_WRITE("\xd0\xdf", empack_write_i64(&buffer, -33));
+  /* TEST_SIMPLE_WRITE("\xd0\x80", empack_write_i64(&buffer, -128)); */
+  TEST_SIMPLE_WRITE("\xd1\xff\x7f", empack_write_i64(&buffer, -129));
+  TEST_SIMPLE_WRITE("\xd1\x80\x00", empack_write_i64(&buffer, -32768));
+  TEST_SIMPLE_WRITE("\xd2\xff\xff\x7f\xff", empack_write_i64(&buffer, -32769));
 
   // when using INT32_C() and compiling the test suite as c++, gcc complains:
   // error: this decimal constant is unsigned only in ISO C90 [-Werror]
-  /* TEST_SIMPLE_WRITE("\xd2\x80\x00\x00\x00", empack_write_i64(&stream, INT64_C(-2147483648))); */
+  /* TEST_SIMPLE_WRITE("\xd2\x80\x00\x00\x00", empack_write_i64(&buffer, INT64_C(-2147483648))); */
 
-  /* TEST_SIMPLE_WRITE("\xd3\xff\xff\xff\xff\x7f\xff\xff\xff", empack_write_i64(&stream, INT64_C(-2147483649))); */
-  /* TEST_SIMPLE_WRITE("\xd3\x80\x00\x00\x00\x00\x00\x00\x00", empack_write_i64(&stream, INT64_MIN)); */
+  /* TEST_SIMPLE_WRITE("\xd3\xff\xff\xff\xff\x7f\xff\xff\xff", empack_write_i64(&buffer, INT64_C(-2147483649))); */
+  /* TEST_SIMPLE_WRITE("\xd3\x80\x00\x00\x00\x00\x00\x00\x00", empack_write_i64(&buffer, INT64_MIN)); */
 }
 
 static void test_write_basic_structures()
 {
-  char buf[MAX_TEST_BUFF];
+  em_byte_t buf[MAX_TEST_BUFF];
   size_t size = MAX_TEST_BUFF;
-  stream_t stream;
+  buffer_t buffer;
 
   // we use a mix of int writers below to test their tracking.
 
   // []
-  stream_setup(&stream, buf, size);
-  empack_write_array_header(&stream, 0);
+  buffer_init(&buffer, buf, size);
+  empack_write_array_start(&buffer, 0);
   TEST_DESTROY_MATCH_IMPL("\x90");
 
   // [nil]
-  stream_setup(&stream, buf, size);
-  empack_write_array_header(&stream, 1);
-  empack_write_nil(&stream);
+  buffer_init(&buffer, buf, size);
+  empack_write_array_start(&buffer, 1);
+  empack_write_nil(&buffer);
   TEST_DESTROY_MATCH_IMPL("\x91\xc0");
 
   /* // range(15) */
-  stream_setup(&stream, buf, size);
-  empack_write_array_header(&stream, 15);
+  buffer_init(&buffer, buf, size);
+  empack_write_array_start(&buffer, 15);
   for (int i = 0; i < 15; ++i)
-    empack_write_i32(&stream, i);
+    empack_write_i32(&buffer, i);
   TEST_DESTROY_MATCH_IMPL(
       "\x9f\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e");
 
   // range(16) (larger than infix)
-  stream_setup(&stream, buf, size);
-  empack_write_array_header(&stream, 16);
+  buffer_init(&buffer, buf, size);
+  empack_write_array_start(&buffer, 16);
   for (int i = 0; i < 16; ++i)
-    empack_write_u32(&stream, (uint32_t)i);
+    empack_write_u32(&buffer, (uint32_t)i);
   TEST_DESTROY_MATCH_IMPL(
       "\xdc\x00\x10\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c"
       "\x0d\x0e\x0f");
 
   /* // UINT16_MAX nils */
-  /* stream_setup(&stream, buf, size); */
-  /* empack_start_array(&stream, UINT16_MAX); */
+  /* buffer_init(&buffer, buf, size); */
+  /* empack_array_start(&buffer, UINT16_MAX); */
   /*     for (int i = 0; i < UINT16_MAX; ++i) */
-  /*         empack_write_nil(&stream); */
-  /* empack_finish_array(&stream); */
+  /*         empack_write_nil(&buffer); */
+  /* empack_finish_array(&buffer); */
   /* { */
   /*     const char prefix[] = "\xdc\xff\xff"; */
-  /*     TEST_WRITER_DESTROY_NOERROR(&stream); */
+  /*     TEST_WRITER_DESTROY_NOERROR(&buffer); */
   /*     TEST_TRUE(memcmp(prefix, buf, sizeof(prefix)-1) == 0, "array prefix is incorrect"); */
   /*     TEST_TRUE(size == UINT16_MAX + sizeof(prefix)-1); */
   /* } */
 
   /* // UINT16_MAX+1 nils (largest category) */
-  /* stream_setup(&stream, buf, size); */
-  /* empack_start_array(&stream, UINT16_MAX+1); */
+  /* buffer_init(&buffer, buf, size); */
+  /* empack_array_start(&buffer, UINT16_MAX+1); */
   /*     for (int i = 0; i < UINT16_MAX+1; ++i) */
-  /*         empack_write_nil(&stream); */
-  /* empack_finish_array(&stream); */
+  /*         empack_write_nil(&buffer); */
+  /* empack_finish_array(&buffer); */
   /* { */
   /*     const char prefix[] = "\xdd\x00\x01\x00\x00"; */
-  /*     TEST_WRITER_DESTROY_NOERROR(&stream); */
+  /*     TEST_WRITER_DESTROY_NOERROR(&buffer); */
   /*     TEST_TRUE(memcmp(prefix, buf, sizeof(prefix)-1) == 0, "array prefix is incorrect"); */
   /*     TEST_TRUE(size == UINT16_MAX+1 + sizeof(prefix)-1); */
   /* } */
@@ -264,43 +264,43 @@ static void test_write_basic_structures()
   /*     EMPACK_FREE(buf); */
 
   // {}
-  stream_setup(&stream, buf, size);
-  empack_write_map_header(&stream, 0);
+  buffer_init(&buffer, buf, size);
+  empack_write_map_start(&buffer, 0);
   TEST_DESTROY_MATCH_IMPL("\x80");
 
   // {nil:nil}
-  stream_setup(&stream, buf, size);
-  empack_write_map_header(&stream, 1);
-  empack_write_nil(&stream);
-  empack_write_nil(&stream);
+  buffer_init(&buffer, buf, size);
+  empack_write_map_start(&buffer, 1);
+  empack_write_nil(&buffer);
+  empack_write_nil(&buffer);
   TEST_DESTROY_MATCH_IMPL("\x81\xc0\xc0");
 
   // {0:0,1:1}
-  stream_setup(&stream, buf, size);
-  empack_write_map_header(&stream, 2);
-  empack_write_i8(&stream, 0);
-  empack_write_i16(&stream, 0);
-  empack_write_u8(&stream, 1);
-  empack_write_u16(&stream, 1);
+  buffer_init(&buffer, buf, size);
+  empack_write_map_start(&buffer, 2);
+  empack_write_i8(&buffer, 0);
+  empack_write_i16(&buffer, 0);
+  empack_write_u8(&buffer, 1);
+  empack_write_u16(&buffer, 1);
   TEST_DESTROY_MATCH_IMPL("\x82\x00\x00\x01\x01");
 
   /* // {0:1, 2:3, ..., 28:29} */
-  /* stream_setup(&stream, buf, size); */
-  /* empack_start_map(&stream, 15); */
+  /* buffer_init(&buffer, buf, size); */
+  /* empack_map_start(&buffer, 15); */
   /*     for (int i = 0; i < 30; ++i) */
-  /*         empack_write_i8(&stream, (int8_t)i); */
-  /* empack_finish_map(&stream); */
+  /*         empack_write_i8(&buffer, (int8_t)i); */
+  /* empack_finish_map(&buffer); */
   /* TEST_DESTROY_MATCH( */
   /*     "\x8f\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e" */
   /*     "\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d" */
   /*     ); */
 
   /* // {0:1, 2:3, ..., 28:29, 30:31} (larger than infix) */
-  /* stream_setup(&stream, buf, size); */
-  /* empack_start_map(&stream, 16); */
+  /* buffer_init(&buffer, buf, size); */
+  /* empack_map_start(&buffer, 16); */
   /*     for (int i = 0; i < 32; ++i) */
-  /*         empack_write_int(&stream, i); */
-  /* empack_finish_map(&stream); */
+  /*         empack_write_int(&buffer, i); */
+  /* empack_finish_map(&buffer); */
   /* TEST_DESTROY_MATCH( */
   /*     "\xde\x00\x10\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c" */
   /*     "\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c" */
@@ -308,14 +308,14 @@ static void test_write_basic_structures()
   /*     ); */
 
   /* // UINT16_MAX nil:nils */
-  /* stream_setup(&stream, buf, size); */
-  /* empack_start_map(&stream, UINT16_MAX); */
+  /* buffer_init(&buffer, buf, size); */
+  /* empack_map_start(&buffer, UINT16_MAX); */
   /*     for (int i = 0; i < UINT16_MAX*2; ++i) */
-  /*         empack_write_nil(&stream); */
-  /* empack_finish_map(&stream); */
+  /*         empack_write_nil(&buffer); */
+  /* empack_finish_map(&buffer); */
   /* { */
   /*     const char prefix[] = "\xde\xff\xff"; */
-  /*     TEST_WRITER_DESTROY_NOERROR(&stream); */
+  /*     TEST_WRITER_DESTROY_NOERROR(&buffer); */
   /*     TEST_TRUE(memcmp(prefix, buf, sizeof(prefix)-1) == 0, "map prefix is incorrect"); */
   /*     TEST_TRUE(size == UINT16_MAX*2 + sizeof(prefix)-1); */
   /* } */
@@ -323,14 +323,14 @@ static void test_write_basic_structures()
   /*     EMPACK_FREE(buf); */
 
   /* // UINT16_MAX+1 nil:nils (largest category) */
-  /* stream_setup(&stream, buf, size); */
-  /* empack_start_map(&stream, UINT16_MAX+1); */
+  /* buffer_init(&buffer, buf, size); */
+  /* empack_map_start(&buffer, UINT16_MAX+1); */
   /*     for (int i = 0; i < (UINT16_MAX+1)*2; ++i) */
-  /*         empack_write_nil(&stream); */
-  /* empack_finish_map(&stream); */
+  /*         empack_write_nil(&buffer); */
+  /* empack_finish_map(&buffer); */
   /* { */
   /*     const char prefix[] = "\xdf\x00\x01\x00\x00"; */
-  /*     TEST_WRITER_DESTROY_NOERROR(&stream); */
+  /*     TEST_WRITER_DESTROY_NOERROR(&buffer); */
   /*     TEST_TRUE(memcmp(prefix, buf, sizeof(prefix)-1) == 0, "map prefix is incorrect"); */
   /*     TEST_TRUE(size == (UINT16_MAX+1)*2 + sizeof(prefix)-1); */
   /* } */
@@ -342,7 +342,7 @@ static void test_next_funcs()
 {
   char buf[MAX_TEST_BUFF];
   size_t size = MAX_TEST_BUFF;
-  stream_t stream;
+  buffer_t buffer;
 }
 
 int main()
